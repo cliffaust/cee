@@ -5,6 +5,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.conf import settings
 from django.utils import timezone
 from PIL import Image
+from django.core.validators import FileExtensionValidator
 
 
 DAYS_OF_WEEK = (
@@ -61,6 +62,19 @@ class HomeImage(models.Model):
             output_size = (1080, 1080)
             img.thumbnail(output_size)
             img.save(self.home_image.path)
+
+
+class HomeVideo(models.Model):
+    home = models.ForeignKey(Home, on_delete=models.CASCADE, related_name="home_videos")
+    home_video = models.FileField(
+        blank=True,
+        null=True,
+        upload_to="home_videos",
+        validators=[FileExtensionValidator(allowed_extensions=["mp4"])],
+    )
+
+    def __str__(self):
+        return str(self.home)
 
 
 class OpenDateTime(models.Model):

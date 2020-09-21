@@ -11,6 +11,7 @@ from homes.models import (
     SittingRoomFeature,
     SaveHome,
     GeneralHomeFeatures,
+    HomeVideo,
 )
 
 from django.forms.models import model_to_dict
@@ -37,6 +38,12 @@ class OpenDateTimeSerializer(serializers.ModelSerializer):
 class HomeImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = HomeImage
+        exclude = ["home"]
+
+
+class HomeVideoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HomeVideo
         exclude = ["home"]
 
 
@@ -83,18 +90,18 @@ class SaveHomeSerializer(serializers.ModelSerializer):
         data = model_to_dict(instance.home)
         return {
             "home_id": data["id"],
-            "home_price": data["home_price"],
-            "home_type": data["home_type"],
-            "virtual_tour_url": data["virtual_tour_url"],
-            "hoa_dues": data["hoa_dues"],
-            "address": data["address"],
-            "number_bedrooms": data["number_bedrooms"],
-            "number_bathrooms": data["number_bathrooms"],
-            "home_size": data["home_size"],
-            "year_built": data["year_built"],
-            "describe_home": data["describe_home"],
-            "related_website": data["related_website"],
-            "love_about_home": data["love_about_home"],
+            # "home_price": data["home_price"],
+            # "home_type": data["home_type"],
+            # "virtual_tour_url": data["virtual_tour_url"],
+            # "hoa_dues": data["hoa_dues"],
+            # "address": data["address"],
+            # "number_bedrooms": data["number_bedrooms"],
+            # "number_bathrooms": data["number_bathrooms"],
+            # "home_size": data["home_size"],
+            # "year_built": data["year_built"],
+            # "describe_home": data["describe_home"],
+            # "related_website": data["related_website"],
+            # "love_about_home": data["love_about_home"],
         }
 
 

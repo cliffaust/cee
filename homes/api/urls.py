@@ -29,6 +29,8 @@ from .views import (
     OpenDataTimeListView,
     RoomFeatureListView,
     SittingRoomFeatureListView,
+    HomeVideoCreateView,
+    HomeVideoListView,
 )
 from django.urls import path
 
@@ -52,13 +54,24 @@ urlpatterns = [
         name="create-home-image",
     ),
     path("homes/<int:pk>/save-like/", SaveHomeAPIView.as_view(), name="save-like"),
-    path("home-images/", HomeImageListView.as_view(), name="home-images"),
+    path("home-images/", HomeImageListView.as_view(), name="all-home-images"),
     path(
         "homes/<int:home_pk>/home-images/",
         HomeImageListView.as_view(),
         name="home-images",
     ),
     path("home-images/<int:pk>/", HomeImageDetailView.as_view(), name="home-image"),
+    path(
+        "homes/<int:home_pk>/create-home-video/",
+        HomeVideoCreateView.as_view(),
+        name="create-home-video",
+    ),
+    path("home-videos/", HomeVideoListView.as_view(), name="all-home-videos"),
+    path(
+        "homes/<int:home_pk>/home-videos/",
+        HomeVideoListView.as_view(),
+        name="home-videos",
+    ),
     path(
         "homes/<int:home_pk>/create-home-review/",
         HomeReviewCreateView.as_view(),

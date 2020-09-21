@@ -1,44 +1,43 @@
-from homes.models import (
-    Home,
-    HomeImage,
-    HomeCoordinate,
-    OpenDateTime,
-    ContactNumber,
-    HomeReview,
-    RoomFeature,
-    KitchenFeature,
-    SittingRoomFeature,
-    SaveHome,
-    GeneralHomeFeatures,
-)
-from profiles.models import Profile
-from .serializers import (
-    HomeCoordinateSerializer,
-    ContactNumberSerializer,
-    OpenDateTimeSerializer,
-    HomeImageSerializer,
-    HomeSerializer,
-    HomeReviewSerializer,
-    RoomFeatureSerializer,
-    KitchenFeatureSerializer,
-    SittingRoomFeatureSerializer,
-    SaveHomeSerializer,
-    GeneralHomeFeaturesSerializer,
-)
-from rest_framework import generics
-from .permissions import IsUserHome, IsUserReview, IsUserHomeInstance
+from django.core.exceptions import PermissionDenied
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import generics, status, viewsets
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from rest_framework.exceptions import ValidationError
+from homes.models import (
+    ContactNumber,
+    GeneralHomeFeatures,
+    Home,
+    HomeCoordinate,
+    HomeImage,
+    HomeReview,
+    KitchenFeature,
+    OpenDateTime,
+    RoomFeature,
+    SaveHome,
+    SittingRoomFeature,
+    HomeVideo,
+)
+from profiles.models import Profile
 
-from rest_framework.response import Response
-from rest_framework import status
 from .filterset import HomeFilter
-from rest_framework.filters import SearchFilter
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import OrderingFilter
-from rest_framework import viewsets
+from .permissions import IsUserHome, IsUserHomeInstance, IsUserReview
+from .serializers import (
+    ContactNumberSerializer,
+    GeneralHomeFeaturesSerializer,
+    HomeCoordinateSerializer,
+    HomeImageSerializer,
+    HomeReviewSerializer,
+    HomeSerializer,
+    KitchenFeatureSerializer,
+    OpenDateTimeSerializer,
+    RoomFeatureSerializer,
+    SaveHomeSerializer,
+    SittingRoomFeatureSerializer,
+    HomeVideoSerializer,
+)
 
 
 class HomeListView(generics.ListAPIView):
@@ -74,7 +73,7 @@ class HomeCreateView(generics.CreateAPIView):
         profile_pk = self.kwargs.get("profile_pk")
         profile = generics.get_object_or_404(Profile, pk=profile_pk)
         if profile.user != self.request.user:
-            raise ValidationError("You are not allowed add a home to this profile")
+            raise PermissionDenied("You are not allowed add a home to this profile")
         serializer.save(user=self.request.user, profile=profile)
 
 
@@ -103,8 +102,8 @@ class HomeImageCreateView(generics.CreateAPIView):
         home_queryset = Home.objects.filter(id=home_pk, user=self.request.user)
 
         if not home_queryset.exists():
-            raise ValidationError("You can't add an image to this home")
-        serializer.save(home=home)
+            raise PermissionDenied("You can't add an image to this home")
+        return serializer.save(home=home)
 
 
 class HomeImageListView(generics.ListAPIView):
@@ -117,6 +116,35 @@ class HomeImageListView(generics.ListAPIView):
         if home_pk is not None:
             home = generics.get_object_or_404(Home, pk=home_pk)
             queryset = HomeImage.objects.filter(home=home)
+
+        return queryset
+
+
+class HomeVideoCreateView(generics.CreateAPIView):
+    queryset = HomeVideo.objects.all()
+    serializer_class = HomeVideoSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        home_pk = self.kwargs.get("home_pk")
+        home = generics.get_object_or_404(Home, pk=home_pk)
+        home_queryset = Home.objects.filter(id=home_pk, user=self.request.user)
+
+        if not home_queryset.exists():
+            raise PermissionDenied("You can't add a video to this home")
+        return serializer.save(home=home)
+
+
+class HomeVideoListView(generics.ListAPIView):
+    serializer_class = HomeVideoSerializer
+
+    def get_queryset(self):
+        queryset = HomeVideo.objects.all()
+
+        home_pk = self.kwargs.get("home_pk")
+        if home_pk is not None:
+            home = generics.get_object_or_404(Home, pk=home_pk)
+            queryset = HomeVideo.objects.filter(home=home)
 
         return queryset
 
@@ -153,7 +181,7 @@ class OpenDateTimeCreateView(generics.CreateAPIView):
         home_queryset = Home.objects.filter(id=home_pk, user=self.request.user)
 
         if not home_queryset.exists():
-            raise ValidationError("You can't add a date to this home")
+            raise PermissionDenied("You can't add a date to this home")
         serializer.save(home=home)
 
 
@@ -189,7 +217,7 @@ class ContactNumberCreateView(generics.CreateAPIView):
         home_queryset = Home.objects.filter(id=home_pk, user=self.request.user)
 
         if not home_queryset.exists():
-            raise ValidationError("You can't add a number to this home")
+            raise PermissionDenied("You can't add a number to this home")
         serializer.save(home=home)
 
 
@@ -227,10 +255,10 @@ class HomeCoordinateCreateView(generics.CreateAPIView):
         home_coordinate_queryset = HomeCoordinate.objects.filter(home=home_pk)
 
         if not home_queryset.exists():
-            raise ValidationError("You can't add a coordinate to this home")
+            raise PermissionDenied("You can't add a coordinate to this home")
 
         elif home_coordinate_queryset.exists():
-            raise ValidationError("You can't add more than one coordinate")
+            raise PermissionDenied("You can't add more than one coordinate")
 
         serializer.save(home=home)
 
@@ -268,10 +296,10 @@ class HomeReviewCreateView(generics.CreateAPIView):
         home_queryset = Home.objects.filter(id=home_pk, user=self.request.user)
 
         if review_queryset.exists():
-            raise ValidationError("User has already reviewed this home")
+            raise PermissionDenied("User has already reviewed this home")
 
         elif home_queryset.exists():
-            raise ValidationError("You can't make a review on your home")
+            raise PermissionDenied("You can't make a review on your home")
 
         serializer.save(home=home, user=self.request.user)
 
@@ -308,7 +336,7 @@ class RoomFeatureCreateView(generics.CreateAPIView):
         home_queryset = Home.objects.filter(id=home_pk, user=self.request.user)
 
         if not home_queryset.exists():
-            raise ValidationError("You can't add a feature to this home")
+            raise PermissionDenied("You can't add a feature to this home")
         serializer.save(home=home)
 
 
@@ -338,12 +366,12 @@ class GeneralHomeFeaturesCreateView(generics.CreateAPIView):
         home_queryset = Home.objects.filter(id=home_pk, user=self.request.user)
 
         if not home_queryset.exists():
-            raise ValidationError("You can't add a feature to this home")
+            raise PermissionDenied("You can't add a feature to this home")
 
         elif home.general_home_features.filter(
             home_feature=self.request.data["home_feature"].lower()
         ).exists():
-            raise ValidationError("You can't add the same feature twice")
+            raise PermissionDenied("You can't add the same feature twice")
         serializer.save(home=home)
 
 
@@ -373,7 +401,7 @@ class KitchenFeatureCreateView(generics.CreateAPIView):
         home_queryset = Home.objects.filter(id=home_pk, user=self.request.user)
 
         if not home_queryset.exists():
-            raise ValidationError("You can't add a feature")
+            raise PermissionDenied("You can't add a feature")
         serializer.save(home=home)
 
 
@@ -403,7 +431,7 @@ class SittingRoomFeatureCreateView(generics.CreateAPIView):
         home_queryset = Home.objects.filter(id=home_pk, user=self.request.user)
 
         if not home_queryset.exists():
-            raise ValidationError("You can't add a feature")
+            raise PermissionDenied("You can't add a feature")
         serializer.save(home=home)
 
 
@@ -419,11 +447,11 @@ class SaveHomeCreateView(generics.CreateAPIView):
         profile = generics.get_object_or_404(Profile, pk=profile_pk)
 
         if profile.user != self.request.user:
-            raise ValidationError("You are not allowed to save this home")
+            raise PermissionDenied("You are not allowed to save this home")
         elif profile.saved_homes.filter(home=home).exists():
-            raise ValidationError("You have already saved this home")
+            raise PermissionDenied("You have already saved this home")
         elif home.user == profile.user:
-            raise ValidationError("You are not allowed to save your home")
+            raise PermissionDenied("You are not allowed to save your home")
         serializer.save(home=home, profile=profile, user=self.request.user)
 
 

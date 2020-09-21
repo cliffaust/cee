@@ -11,6 +11,7 @@ from .models import (
     SittingRoomFeature,
     SaveHome,
     GeneralHomeFeatures,
+    HomeVideo,
 )
 
 admin.site.register(Home)
@@ -24,3 +25,4 @@ admin.site.register(KitchenFeature)
 admin.site.register(SittingRoomFeature)
 admin.site.register(SaveHome)
 admin.site.register(GeneralHomeFeatures)
+admin.site.register(HomeVideo)

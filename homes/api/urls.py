@@ -31,6 +31,8 @@ from .views import (
     SittingRoomFeatureListView,
     HomeVideoCreateView,
     HomeVideoListView,
+    HomeVideoSerializer,
+    HomeVideoDetailView,
 )
 from django.urls import path
 
@@ -60,7 +62,16 @@ urlpatterns = [
         HomeImageListView.as_view(),
         name="home-images",
     ),
-    path("home-images/<int:pk>/", HomeImageDetailView.as_view(), name="home-image"),
+    path(
+        "homes/<int:home_pk>/home-images/<int:pk>/",
+        HomeImageDetailView.as_view(),
+        name="home-image",
+    ),
+    path(
+        "homes/<int:home_pk>/home-videos/<int:pk>/",
+        HomeVideoDetailView.as_view(),
+        name="home-video",
+    ),
     path(
         "homes/<int:home_pk>/create-home-video/",
         HomeVideoCreateView.as_view(),
@@ -84,7 +95,7 @@ urlpatterns = [
         name="home-list-reviews",
     ),
     path(
-        "home-reviews/<int:pk>/",
+        "homes/<int:home_pk>/home-reviews/<int:pk>/",
         HomeReviewDetailView.as_view(),
         name="home-review",
     ),
@@ -97,20 +108,24 @@ urlpatterns = [
         "homes/<int:home_pk>/open-date-time/<int:pk>/",
         OpenDateTimeDetailView.as_view(),
         name="open-date-time",
-    ),  # check this one
+    ),
     path(
         "homes/<int:home_pk>/open-date-time/",
         OpenDataTimeListView.as_view(),
         name="list-open-date-time",
     ),
-    path("contact-numbers/", ContactNumberListView.as_view(), name="contact-numbers"),
+    path(
+        "home-contact-numbers/",
+        ContactNumberListView.as_view(),
+        name="home-contact-numbers",
+    ),
     path(
         "homes/<int:home_pk>/contact-numbers/",
         ContactNumberListView.as_view(),
         name="list-home-contact-number",
     ),
     path(
-        "contact-numbers/<int:pk>/",
+        "homes/<int:home_pk>/contact-numbers/<int:pk>/",
         ContactNumberDetailView.as_view(),
         name="home-number",
     ),
@@ -120,7 +135,7 @@ urlpatterns = [
         name="create-contact-number",
     ),
     path(
-        "home-coordinates/<int:pk>/",
+        "homes/<int:home_pk>/home-coordinate/<int:pk>/",
         HomeCoordinateDetailView.as_view(),
         name="home-coordinate",
     ),

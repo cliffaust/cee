@@ -5,6 +5,28 @@ ALPHANUMERIC_CHARS = string.ascii_lowercase + string.digits
 
 STRING_LENGTH = 6
 
+VIDEO_FILE_FORMATS = ["MP4", "m4v"]
+
 
 def generate_random_string(chars=ALPHANUMERIC_CHARS, length=STRING_LENGTH):
     return "".join(random.choice(chars) for _ in range(length))
+
+
+def home_image_thumbnail(instance, filename):
+    return f"home_images/{instance.home.id}/{filename}"
+
+
+def home_video_thumbnail(instance, filename):
+    return f"home_videos/{instance.home.id}/{filename}"
+
+
+def land_image_thumbnail(instance, filename):
+    return f"land_images/{instance.land.id}/{filename}"
+
+
+def land_video_thumbnail(instance, filename):
+    return f"land_videos/{instance.land.id}/{filename}"
+
+
+def profile_image_thumbnail(instance, filename):
+    return f"profile_images/{instance.user.id}/{filename}"

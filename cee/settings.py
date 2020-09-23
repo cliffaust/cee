@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "user",
     "profiles",
     "homes",
+    "lands",
     "django_cleanup",
     "phonenumber_field",
     "django_filters",

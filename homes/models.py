@@ -5,7 +5,9 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.conf import settings
 from django.utils import timezone
 from PIL import Image
+
 from django.core.validators import FileExtensionValidator
+from core.utils import home_image_thumbnail, home_video_thumbnail, VIDEO_FILE_FORMATS
 
 
 DAYS_OF_WEEK = (
@@ -40,15 +42,17 @@ class Home(models.Model):
     love_about_home = models.TextField(blank=True)
     home_status = models.CharField(max_length=1, choices=HOME_STATUS, blank=True)
     date_posted = models.DateField(default=timezone.now)
-    saves = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="saves")
+    saves = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="home_saves")
 
     def __str__(self):
-        return self.user.username
+        return str(self.user)
 
 
 class HomeImage(models.Model):
     home = models.ForeignKey(Home, on_delete=models.CASCADE, related_name="home_images")
-    home_image = models.ImageField(blank=True, null=True, upload_to="home_images")
+    home_image = models.ImageField(
+        blank=True, null=True, upload_to=home_image_thumbnail
+    )
 
     def __str__(self):
         return str(self.home)
@@ -69,8 +73,12 @@ class HomeVideo(models.Model):
     home_video = models.FileField(
         blank=True,
         null=True,
-        upload_to="home_videos",
-        validators=[FileExtensionValidator(allowed_extensions=["mp4"])],
+        upload_to=home_video_thumbnail,
+        validators=[
+            FileExtensionValidator(
+                allowed_extensions=VIDEO_FILE_FORMATS, message="unsupported file format"
+            )
+        ],
     )
 
     def __str__(self):
@@ -91,7 +99,7 @@ class OpenDateTime(models.Model):
 
 class ContactNumber(models.Model):
     home = models.ForeignKey(
-        Home, on_delete=models.CASCADE, related_name="contact_number"
+        Home, on_delete=models.CASCADE, related_name="contact_numbers"
     )
     number = PhoneNumberField(blank=True)
 
@@ -114,7 +122,7 @@ class HomeReview(models.Model):
     home = models.ForeignKey(Home, on_delete=models.CASCADE, related_name="reviews")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     rate = models.IntegerField(
-        validators=(MinValueValidator(0), MaxValueValidator(5)), blank=True, null=True
+        blank=True, null=True, validators=(MinValueValidator(0), MaxValueValidator(5))
     )
     message = models.CharField(max_length=500, blank=True, null=True)
 

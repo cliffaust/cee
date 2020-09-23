@@ -5,6 +5,7 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.validators import ValidationError
 
 from homes.models import (
     ContactNumber,
@@ -149,10 +150,32 @@ class HomeVideoListView(generics.ListAPIView):
         return queryset
 
 
+class HomeVideoDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = HomeVideoSerializer
+    permission_classes = [IsUserHome]
+
+    def get_queryset(self):
+
+        home_pk = self.kwargs.get("home_pk")
+        if home_pk is not None:
+            home = generics.get_object_or_404(Home, pk=home_pk)
+            queryset = HomeVideo.objects.filter(home=home)
+
+        return queryset
+
+
 class HomeImageDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = HomeImage.objects.all()
     serializer_class = HomeImageSerializer
-    permission_classes = [IsAuthenticated, IsUserHome]
+    permission_classes = [IsUserHome]
+
+    def get_queryset(self):
+
+        home_pk = self.kwargs.get("home_pk")
+        if home_pk is not None:
+            home = generics.get_object_or_404(Home, pk=home_pk)
+            queryset = HomeImage.objects.filter(home=home)
+
+        return queryset
 
 
 class OpenDataTimeListView(generics.ListAPIView):
@@ -186,9 +209,17 @@ class OpenDateTimeCreateView(generics.CreateAPIView):
 
 
 class OpenDateTimeDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = OpenDateTime.objects.all()
     serializer_class = OpenDateTimeSerializer
-    permission_classes = [IsAuthenticated, IsUserHome]
+    permission_classes = [IsUserHome]
+
+    def get_queryset(self):
+
+        home_pk = self.kwargs.get("home_pk")
+        if home_pk is not None:
+            home = generics.get_object_or_404(Home, pk=home_pk)
+            queryset = OpenDateTime.objects.filter(home=home)
+
+        return queryset
 
 
 class ContactNumberListView(generics.ListAPIView):
@@ -222,9 +253,17 @@ class ContactNumberCreateView(generics.CreateAPIView):
 
 
 class ContactNumberDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = ContactNumber.objects.all()
     serializer_class = ContactNumberSerializer
-    permission_classes = [IsAuthenticated, IsUserHome]
+    permission_classes = [IsUserHome]
+
+    def get_queryset(self):
+
+        home_pk = self.kwargs.get("home_pk")
+        if home_pk is not None:
+            home = generics.get_object_or_404(Home, pk=home_pk)
+            queryset = ContactNumber.objects.filter(home=home)
+
+        return queryset
 
 
 class HomeCoordinateListView(generics.ListAPIView):
@@ -258,14 +297,23 @@ class HomeCoordinateCreateView(generics.CreateAPIView):
             raise PermissionDenied("You can't add a coordinate to this home")
 
         elif home_coordinate_queryset.exists():
-            raise PermissionDenied("You can't add more than one coordinate")
+            raise ValidationError("You can't add more than one coordinate")
 
         serializer.save(home=home)
 
 
 class HomeCoordinateDetailView(generics.RetrieveUpdateAPIView):
-    queryset = HomeCoordinate.objects.all()
     serializer_class = HomeCoordinateSerializer
+    permission_classes = [IsUserHome]
+
+    def get_queryset(self):
+
+        home_pk = self.kwargs.get("home_pk")
+        if home_pk is not None:
+            home = generics.get_object_or_404(Home, pk=home_pk)
+            queryset = HomeCoordinate.objects.filter(home=home)
+
+        return queryset
 
 
 class HomeReviewListView(generics.ListAPIView):
@@ -296,7 +344,7 @@ class HomeReviewCreateView(generics.CreateAPIView):
         home_queryset = Home.objects.filter(id=home_pk, user=self.request.user)
 
         if review_queryset.exists():
-            raise PermissionDenied("User has already reviewed this home")
+            raise ValidationError("User has already reviewed this home")
 
         elif home_queryset.exists():
             raise PermissionDenied("You can't make a review on your home")
@@ -305,9 +353,17 @@ class HomeReviewCreateView(generics.CreateAPIView):
 
 
 class HomeReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = HomeReview.objects.all()
     serializer_class = HomeReviewSerializer
-    permission_classes = [IsAuthenticated, IsUserReview]
+    permission_classes = [IsUserReview]
+
+    def get_queryset(self):
+
+        home_pk = self.kwargs.get("home_pk")
+        if home_pk is not None:
+            home = generics.get_object_or_404(Home, pk=home_pk)
+            queryset = HomeReview.objects.filter(home=home)
+
+        return queryset
 
 
 class RoomFeatureListView(generics.ListAPIView):
@@ -371,7 +427,7 @@ class GeneralHomeFeaturesCreateView(generics.CreateAPIView):
         elif home.general_home_features.filter(
             home_feature=self.request.data["home_feature"].lower()
         ).exists():
-            raise PermissionDenied("You can't add the same feature twice")
+            raise ValidationError("You can't add the same feature twice")
         serializer.save(home=home)
 
 
@@ -449,7 +505,7 @@ class SaveHomeCreateView(generics.CreateAPIView):
         if profile.user != self.request.user:
             raise PermissionDenied("You are not allowed to save this home")
         elif profile.saved_homes.filter(home=home).exists():
-            raise PermissionDenied("You have already saved this home")
+            raise ValidationError("You have already saved this home")
         elif home.user == profile.user:
             raise PermissionDenied("You are not allowed to save your home")
         serializer.save(home=home, profile=profile, user=self.request.user)
@@ -479,6 +535,9 @@ class SaveHomeAPIView(APIView):
         home = generics.get_object_or_404(Home, pk=pk)
         user = request.user
 
+        if home.user == request.user:
+            raise PermissionDenied("You can't save your home")
+
         home.saves.remove(user)
         home.save()
 
@@ -490,6 +549,9 @@ class SaveHomeAPIView(APIView):
     def post(self, request, pk):
         home = generics.get_object_or_404(Home, pk=pk)
         user = request.user
+
+        if home.user == request.user:
+            raise PermissionDenied("You can't save your home")
 
         home.saves.add(user)
         home.save()

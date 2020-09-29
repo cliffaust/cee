@@ -41,19 +41,23 @@ INSTALLED_APPS = [
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.facebook",
     "rest_framework",
     "rest_framework.authtoken",
+    "django_cleanup",
+    "phonenumber_field",
+    "django_filters",
     "user",
     "profiles",
     "homes",
     "lands",
-    "django_cleanup",
-    "phonenumber_field",
-    "django_filters",
 ]
 
 REST_FRAMEWORK = {
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "PAGE_SIZE": 100
     #     "DEFAULT_AUTHENTICATION_CLASSES": [
     #         "rest_framework.authentication.TokenAuthentication",
     #     ]
@@ -88,6 +92,11 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "cee.wsgi.application"
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
 
 
 # Database

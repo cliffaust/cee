@@ -1,4 +1,4 @@
-from django.core.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, status, viewsets
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -65,7 +65,7 @@ class LandCreateView(generics.CreateAPIView):
         profile_pk = self.kwargs.get("profile_pk")
         profile = generics.get_object_or_404(Profile, pk=profile_pk)
         if profile.user != self.request.user:
-            raise PermissionDenied("You are not allowed add a land to this profile")
+            raise PermissionDenied("You are not allowed to add a land to this profile")
         serializer.save(user=self.request.user, profile=profile)
 
 
@@ -383,7 +383,7 @@ class SaveLandAPIView(APIView):
         user = request.user
 
         if land.user == request.user:
-            raise PermissionDenied("You can't save your home")
+            raise PermissionDenied()
 
         land.saves.remove(user)
         land.save()

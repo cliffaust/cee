@@ -70,6 +70,7 @@ class LandSerializer(serializers.ModelSerializer):
     has_user_saved = serializers.SerializerMethodField()
     date_posted = serializers.StringRelatedField(read_only=True)
     slug = serializers.StringRelatedField(read_only=True)
+    user_email = serializers.SerializerMethodField()
 
     class Meta:
         model = Land
@@ -81,3 +82,6 @@ class LandSerializer(serializers.ModelSerializer):
     def get_has_user_saved(self, instance):
         request = self.context.get("request")
         return instance.saves.filter(pk=request.user.pk).exists()
+
+    def get_user_email(self, instance):
+        return instance.user.email

@@ -5,7 +5,51 @@ ALPHANUMERIC_CHARS = string.ascii_lowercase + string.digits
 
 STRING_LENGTH = 6
 
-VIDEO_FILE_FORMATS = ["MP4", "m4v"]
+VIDEO_FILE_FORMATS = [
+    "MP4",
+    "m4v",
+    "webm",
+    "mkv",
+    "flv",
+    "flc",
+    "vob",
+    "ogv",
+    "ogg",
+    "drc",
+    "gif",
+    "gifv",
+    "mng",
+    "avi",
+    "MTS",
+    "M2TS",
+    "TS",
+    "mov",
+    "qt",
+    "wmv",
+    "yuv",
+    "rm",
+    "rmvb",
+    "viv",
+    "asf",
+    "amv",
+    "m4p",
+    "mpg",
+    "mp2",
+    "mpeg",
+    "mpe",
+    "mpv",
+    "m2v",
+    "svi",
+    "3gp",
+    "3g2",
+    "mxf",
+    "roq",
+    "nsv",
+    "f4v",
+    "f4p",
+    "f4a",
+    "f4b",
+]
 
 
 def generate_random_string(chars=ALPHANUMERIC_CHARS, length=STRING_LENGTH):

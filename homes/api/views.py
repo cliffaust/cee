@@ -1,4 +1,4 @@
-from django.core.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, status, viewsets
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -39,6 +39,7 @@ from .serializers import (
     SittingRoomFeatureSerializer,
     HomeVideoSerializer,
 )
+from .pagination import HomePagination
 
 
 class HomeListView(generics.ListAPIView):
@@ -53,6 +54,7 @@ class HomeListView(generics.ListAPIView):
         "home_size",
     ]
     search_fields = ["address", "city"]
+    pagination_class = HomePagination
 
     def get_queryset(self):
         queryset = Home.objects.all()
@@ -74,7 +76,7 @@ class HomeCreateView(generics.CreateAPIView):
         profile_pk = self.kwargs.get("profile_pk")
         profile = generics.get_object_or_404(Profile, pk=profile_pk)
         if profile.user != self.request.user:
-            raise PermissionDenied("You are not allowed add a home to this profile")
+            raise PermissionDenied("You are not allowed to add a home to this profile")
         serializer.save(user=self.request.user, profile=profile)
 
 
@@ -204,7 +206,7 @@ class OpenDateTimeCreateView(generics.CreateAPIView):
         home_queryset = Home.objects.filter(id=home_pk, user=self.request.user)
 
         if not home_queryset.exists():
-            raise PermissionDenied("You can't add a date to this home")
+            raise PermissionDenied("You can't add a date or time to this home")
         serializer.save(home=home)
 
 
@@ -248,7 +250,7 @@ class ContactNumberCreateView(generics.CreateAPIView):
         home_queryset = Home.objects.filter(id=home_pk, user=self.request.user)
 
         if not home_queryset.exists():
-            raise PermissionDenied("You can't add a number to this home")
+            raise PermissionDenied("You can't add a contact number to this home")
         serializer.save(home=home)
 
 
@@ -536,7 +538,7 @@ class SaveHomeAPIView(APIView):
         user = request.user
 
         if home.user == request.user:
-            raise PermissionDenied("You can't save your home")
+            raise PermissionDenied()
 
         home.saves.remove(user)
         home.save()

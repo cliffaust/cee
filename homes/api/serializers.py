@@ -90,18 +90,6 @@ class SaveHomeSerializer(serializers.ModelSerializer):
         data = model_to_dict(instance.home)
         return {
             "home_id": data["id"],
-            # "home_price": data["home_price"],
-            # "home_type": data["home_type"],
-            # "virtual_tour_url": data["virtual_tour_url"],
-            # "hoa_dues": data["hoa_dues"],
-            # "address": data["address"],
-            # "number_bedrooms": data["number_bedrooms"],
-            # "number_bathrooms": data["number_bathrooms"],
-            # "home_size": data["home_size"],
-            # "year_built": data["year_built"],
-            # "describe_home": data["describe_home"],
-            # "related_website": data["related_website"],
-            # "love_about_home": data["love_about_home"],
         }
 
 
@@ -111,6 +99,7 @@ class HomeSerializer(serializers.ModelSerializer):
     has_user_saved = serializers.SerializerMethodField()
     date_posted = serializers.StringRelatedField(read_only=True)
     slug = serializers.StringRelatedField(read_only=True)
+    user_email = serializers.SerializerMethodField()
 
     class Meta:
         model = Home
@@ -122,3 +111,6 @@ class HomeSerializer(serializers.ModelSerializer):
     def get_has_user_saved(self, instance):
         request = self.context.get("request")
         return instance.saves.filter(pk=request.user.pk).exists()
+
+    def get_user_email(self, instance):
+        return instance.user.email
